@@ -4,11 +4,13 @@ import (
 	"fmt"
 	"math"
 	"strconv"
+	"strings"
 )
 
 type floatElement struct {
-	e   float64
-	nan bool
+	e         float64
+	precision uint8
+	nan       bool
 }
 
 // force floatElement struct to implement Element interface
@@ -22,16 +24,19 @@ func (e *floatElement) Set(value interface{}) {
 			e.nan = true
 			return
 		}
+		v := strings.TrimSpace(value.(string))
 		f, err := strconv.ParseFloat(value.(string), 64)
 		if err != nil {
 			e.nan = true
 			return
 		}
 		e.e = f
+		e.precision = uint8(len(v) - strings.LastIndex(value.(string), ".") - 1)
 	case int:
 		e.e = float64(val)
 	case float64:
 		e.e = float64(val)
+		e.precision = 255
 	case bool:
 		b := val
 		if b {
@@ -40,6 +45,12 @@ func (e *floatElement) Set(value interface{}) {
 			e.e = 0
 		}
 	case Element:
+		if fe, ok := value.(*floatElement); ok {
+			e.e = fe.e
+			e.precision = fe.precision
+			e.nan = fe.nan
+			return
+		}
 		e.e = val.Float()
 	default:
 		e.nan = true
@@ -48,10 +59,7 @@ func (e *floatElement) Set(value interface{}) {
 }
 
 func (e floatElement) Copy() Element {
-	if e.IsNA() {
-		return &floatElement{0.0, true}
-	}
-	return &floatElement{e.e, false}
+	return &floatElement{e.e, e.precision, e.nan}
 }
 
 func (e floatElement) IsNA() bool {
@@ -69,7 +77,7 @@ func (e floatElement) Val() ElementValue {
 	if e.IsNA() {
 		return nil
 	}
-	return float64(e.e)
+	return convertToDecimalPlaces(e.e, e.precision)
 }
 
 func (e floatElement) String() string {
@@ -113,12 +121,40 @@ func (e floatElement) Bool() (bool, error) {
 	return false, fmt.Errorf("can't convert Float \"%v\" to bool", e.e)
 }
 
+func (e floatElement) IntElement() *intElement {
+	el := &intElement{}
+	el.Set(e.Val())
+	return el
+}
+
+func (e floatElement) FloatElement() *floatElement {
+	return &e
+}
+
+func (e floatElement) StringElement() *stringElement {
+	el := &stringElement{}
+	el.Set(e.Val())
+	return el
+}
+
+func (e floatElement) BoolElement() *boolElement {
+	el := &boolElement{}
+	el.Set(e.Val())
+	return el
+}
+
 func (e floatElement) Eq(elem Element) bool {
-	f := elem.Float()
-	if e.IsNA() || math.IsNaN(f) {
+	if e.IsNA() || elem.IsNA() {
 		return false
 	}
-	return e.e == f
+
+	switch fe := elem.(type) {
+	case *floatElement:
+		return convertToDecimalPlaces(e.e, e.precision) == convertToDecimalPlaces(fe.e, fe.precision)
+	default:
+		f := fe.Float()
+		return e.e == f
+	}
 }
 
 func (e floatElement) Neq(elem Element) bool {
@@ -159,4 +195,22 @@ func (e floatElement) GreaterEq(elem Element) bool {
 		return false
 	}
 	return e.e >= f
+}
+
+// WithPrecision creates a new floatElement with the specified precision
+func (e floatElement) WithPrecision(precision uint8) *floatElement {
+	if e.precision == precision {
+		return &e
+	}
+
+	if e.IsNA() {
+		return &floatElement{nan: true}
+	}
+	return &floatElement{e.e, precision, false}
+}
+
+func convertToDecimalPlaces(f float64, precision uint8) float64 {
+	p := math.Pow(10, float64(precision))
+	a := math.Round(f*p) / p
+	return a
 }

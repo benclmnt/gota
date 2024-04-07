@@ -125,6 +125,28 @@ func (e boolElement) Bool() (bool, error) {
 	return bool(e.e), nil
 }
 
+func (e boolElement) IntElement() *intElement {
+	el := &intElement{}
+	el.Set(e.Val())
+	return el
+}
+
+func (e boolElement) FloatElement() *floatElement {
+	el := &floatElement{}
+	el.Set(e.Val())
+	return el
+}
+
+func (e boolElement) StringElement() *stringElement {
+	el := &stringElement{}
+	el.Set(e.Val())
+	return el
+}
+
+func (e boolElement) BoolElement() *boolElement {
+	return &e
+}
+
 func (e boolElement) Eq(elem Element) bool {
 	b, err := elem.Bool()
 	if err != nil || e.IsNA() {

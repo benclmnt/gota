@@ -53,6 +53,10 @@ type Element interface {
 	Int() (int, error)
 	Float() float64
 	Bool() (bool, error)
+	IntElement() *intElement
+	FloatElement() *floatElement
+	StringElement() *stringElement
+	BoolElement() *boolElement
 
 	// Information methods
 	IsNA() bool
@@ -123,11 +127,11 @@ const (
 // Indexes represent the elements that can be used for selecting a subset of
 // elements within a Series. Currently supported are:
 //
-//     int            // Matches the given index number
-//     []int          // Matches all given index numbers
-//     []bool         // Matches all elements in a Series marked as true
-//     Series [Int]   // Same as []int
-//     Series [Bool]  // Same as []bool
+//	int            // Matches the given index number
+//	[]int          // Matches all given index numbers
+//	[]bool         // Matches all elements in a Series marked as true
+//	Series [Int]   // Same as []int
+//	Series [Bool]  // Same as []bool
 type Indexes interface{}
 
 // New is the generic Series constructor
@@ -506,6 +510,14 @@ func (s Series) Records() []string {
 	for i := 0; i < s.Len(); i++ {
 		e := s.elements.Elem(i)
 		ret[i] = e.String()
+	}
+	return ret
+}
+
+func (s Series) Elements() []Element {
+	ret := make([]Element, s.Len())
+	for i := 0; i < s.Len(); i++ {
+		ret[i] = s.elements.Elem(i)
 	}
 	return ret
 }

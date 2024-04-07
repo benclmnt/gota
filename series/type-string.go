@@ -103,6 +103,28 @@ func (e stringElement) Bool() (bool, error) {
 	return false, fmt.Errorf("can't convert String \"%v\" to bool", e.e)
 }
 
+func (e stringElement) IntElement() *intElement {
+	el := &intElement{}
+	el.Set(e.Val())
+	return el
+}
+
+func (e stringElement) FloatElement() *floatElement {
+	el := &floatElement{}
+	el.Set(e.Val())
+	return el
+}
+
+func (e stringElement) StringElement() *stringElement {
+	return &e
+}
+
+func (e stringElement) BoolElement() *boolElement {
+	el := &boolElement{}
+	el.Set(e.Val())
+	return el
+}
+
 func (e stringElement) Eq(elem Element) bool {
 	if e.IsNA() || elem.IsNA() {
 		return false
