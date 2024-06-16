@@ -3000,3 +3000,25 @@ func TestGroups_GetGroups(t *testing.T) {
 		t.Fatalf("Expected to get 3 groups, got %d", len(groupNames))
 	}
 }
+
+func Test_FindTypes(t *testing.T) {
+	table := []struct {
+		arr      []string
+		expected series.Type
+	}{
+		{[]string{"", "1,023", "1", "2"}, series.Int},
+		{[]string{"", "1,023.45", "1.23", "2"}, series.Float},
+		{[]string{"", "1,023", "1.23", "2"}, series.Float},
+		{[]string{"", "true", "1.23", "2"}, series.Bool},
+		{[]string{"", "a", "1", "2"}, series.String},
+	}
+	for _, tab := range table {
+		typ, err := findType(tab.arr)
+		if err != nil {
+			t.Errorf("unexpected error %v", err)
+		}
+		if typ != tab.expected {
+			t.Errorf("Expected %s, got %s", tab.expected, typ)
+		}
+	}
+}

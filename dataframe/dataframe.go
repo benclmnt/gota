@@ -2249,6 +2249,10 @@ func findType(arr []string) (series.Type, error) {
 		if str == "" || str == "NaN" {
 			continue
 		}
+		if str == "true" || str == "false" {
+			hasBools = true
+			continue
+		}
 		if _, err := strconv.Atoi(str); err == nil {
 			hasInts = true
 			continue
@@ -2257,8 +2261,13 @@ func findType(arr []string) (series.Type, error) {
 			hasFloats = true
 			continue
 		}
-		if str == "true" || str == "false" {
-			hasBools = true
+		stringWithoutComma := strings.ReplaceAll(str, ",", "")
+		if _, err := strconv.Atoi(stringWithoutComma); err == nil {
+			hasInts = true
+			continue
+		}
+		if _, err := strconv.ParseFloat(stringWithoutComma, 64); err == nil {
+			hasFloats = true
 			continue
 		}
 		hasStrings = true
