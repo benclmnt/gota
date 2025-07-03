@@ -2521,7 +2521,7 @@ func TestDataFrame_Capply(t *testing.T) {
 			LoadRecords(
 				[][]string{
 					{"A", "B", "C", "D"},
-					{"NaN", "13", "24.2", "2"},
+					{"0.0", "13", "24.2", "2"},
 				},
 				DefaultType(series.Float),
 				DetectTypes(false),

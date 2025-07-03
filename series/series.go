@@ -522,14 +522,28 @@ func (s Series) Elements() []Element {
 	return ret
 }
 
-// Float returns the elements of a Series as a []float64. If the elements can not
+// FloatWithNA returns the elements of a Series as a []float64. If the elements can not
 // be converted to float64 or contains a NaN returns the float representation of
 // NaN.
-func (s Series) Float() []float64 {
+func (s Series) FloatWithNA() []float64 {
 	ret := make([]float64, s.Len())
 	for i := 0; i < s.Len(); i++ {
 		e := s.elements.Elem(i)
 		ret[i] = e.Float()
+	}
+	return ret
+}
+
+// Float returns the elements of a Series as a []float64. If the elements can not
+// be converted to float64 or contains a NaN, those elements are skipped.
+// This means that the resulting slice may be shorter than the original Series.
+func (s Series) Float() []float64 {
+	ret := make([]float64, 0)
+	for i := 0; i < s.Len(); i++ {
+		e := s.elements.Elem(i)
+		if !math.IsNaN(e.Float()) {
+			ret = append(ret, e.Float())
+		}
 	}
 	return ret
 }

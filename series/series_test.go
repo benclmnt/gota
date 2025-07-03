@@ -1101,7 +1101,7 @@ func TestSeries_Float(t *testing.T) {
 	}
 	for testnum, test := range tests {
 		expected := test.expected
-		received := test.series.Float()
+		received := test.series.FloatWithNA()
 		if !floatEquals(expected, received) {
 			t.Errorf(
 				"Test:%v\nExpected:\n%v\nReceived:\n%v",
@@ -1304,6 +1304,10 @@ func TestSeries_Mean(t *testing.T) {
 		{
 			Strings([]string{"A", "B", "C", "D"}),
 			math.NaN(),
+		},
+		{
+			Strings([]string{"1.0", "2.0", "", "3.0"}),
+			2.0,
 		},
 		{
 			Bools([]bool{true, true, false, true}),
