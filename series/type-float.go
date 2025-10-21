@@ -25,13 +25,14 @@ func (e *floatElement) Set(value interface{}) {
 			return
 		}
 		v := strings.TrimSpace(value.(string))
-		f, err := strconv.ParseFloat(value.(string), 64)
+		v = strings.ReplaceAll(v, ",", "")
+		f, err := strconv.ParseFloat(v, 64)
 		if err != nil {
 			e.nan = true
 			return
 		}
 		e.e = f
-		e.precision = uint8(len(v) - strings.LastIndex(value.(string), ".") - 1)
+		e.precision = uint8(len(v) - strings.LastIndex(v, ".") - 1)
 	case int:
 		e.e = float64(val)
 	case float64:

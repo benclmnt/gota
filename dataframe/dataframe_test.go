@@ -1022,8 +1022,8 @@ func TestLoadRecords(t *testing.T) {
 			LoadRecords(
 				[][]string{
 					{"A", "B", "C", "D"},
-					{"a", "1", "true", "0"},
-					{"b", "2", "true", "0.5"},
+					{"a", "1,200", "true", "0"},
+					{"b", "2.3", "true", "0.5"},
 				},
 				HasHeader(true),
 				DetectTypes(true),
@@ -1034,7 +1034,7 @@ func TestLoadRecords(t *testing.T) {
 			),
 			New(
 				series.New([]string{"a", "b"}, series.String, "A"),
-				series.New([]float64{1, 2}, series.Float, "B"),
+				series.New([]float64{1200, 2.3}, series.Float, "B"),
 				series.New([]bool{true, true}, series.Bool, "C"),
 				series.New([]string{"0", "0.5"}, series.Float, "D"),
 			),

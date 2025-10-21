@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"math"
 	"strconv"
+	"strings"
 )
 
 type intElement struct {
@@ -22,7 +23,8 @@ func (e *intElement) Set(value interface{}) {
 			e.nan = true
 			return
 		}
-		i, err := strconv.Atoi(value.(string))
+		v := strings.ReplaceAll(value.(string), ",", "")
+		i, err := strconv.Atoi(v)
 		if err != nil {
 			e.nan = true
 			return
